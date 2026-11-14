@@ -1,0 +1,62 @@
+name: wayline
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: wayline
+      POSTGRES_USER: wayline
+      POSTGRES_PASSWORD: wayline-local
+    volumes:
+      - wayline-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U wayline -h localhost"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  provider:
+    build: .
+    command: ["uvicorn","app:app","--app-dir","/provider","--host","0.0.0.0","--port","8100"]
+    environment:
+      PROVIDER_DB: /data/provider.sqlite
+      LAB_MODE: ${WAYLINE_LAB:-0}
+    volumes:
+      - provider-data:/data
+    healthcheck:
+      test: ["CMD","python","-c","from urllib.request import urlopen; urlopen('http://127.0.0.1:8100/health',timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  api:
+    build: .
+    command: ["sh","-ec","alembic upgrade head && python -m wayline.seed && exec uvicorn wayline.api:app --host 0.0.0.0"]
+    environment: &settings
+      DATABASE_URL: postgresql+psycopg://wayline:wayline-local@db/wayline
+      PROVIDER_URL: http://provider:8100
+      DEMO_PASSWORD: ${WAYLINE_DEMO_PASSWORD:-Wayline-local-demo}
+      LAB_MODE: ${WAYLINE_LAB:-0}
+    depends_on:
+      db:
+        condition: service_healthy
+      provider:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD","python","-c","from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health',timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  worker:
+    build: .
+    command: ["python","-m","wayline.worker"]
+    environment: *settings
+    depends_on:
+      api:
+        condition: service_healthy
+  web:
+    build: ./frontend
+    ports: ["127.0.0.1:${WAYLINE_PORT:-8140}:80"]
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  wayline-data:
+  provider-data:

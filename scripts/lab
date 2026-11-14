@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+export WAYLINE_LAB=1 WAYLINE_PORT="${WAYLINE_LAB_PORT:-8141}"
+case "${1:-up}" in
+  up) docker compose -p wayline-lab up -d --build --wait ;;
+  stop) docker compose -p wayline-lab down ;;
+  reset) docker compose -p wayline-lab down -v && docker compose -p wayline-lab up -d --build --wait ;;
+  *) echo 'Usage: scripts/lab up|stop|reset' >&2; exit 2 ;;
+esac
