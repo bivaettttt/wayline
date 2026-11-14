@@ -83,7 +83,8 @@ def experiment(name, token, traveler_token):
             return api("POST", "/operations/sync")
 
         flights = {f["number"]: f for f in api("GET", "/flights")}
-        a, b = flights["WL101"], flights["WL202"]
+        first_number = "WL103" if name == "cancel" else "WL101"
+        a, b = flights[first_number], flights["WL202"]
         trip = api(
             "POST",
             "/trips",
@@ -102,21 +103,6 @@ def experiment(name, token, traveler_token):
             "terminal_dep": a["terminal_dep"],
             "terminal_arr": a["terminal_arr"],
         }
-        if a["status"] == "CANCELLED" and name not in {
-            "normal",
-            "midnight",
-            "date_line",
-            "dst",
-            "zones",
-            "no_route",
-            "outage",
-            "recovery",
-            "timeout",
-            "malformed",
-        }:
-            raise RuntimeError(
-                "Reset the isolated lab after cancellation before comparing the same flight"
-            )
         planned = datetime.fromisoformat(a["scheduled_arr"])
 
         def event(delay=0, **overrides):
@@ -274,7 +260,7 @@ def experiment(name, token, traveler_token):
                     "midnight": "WL400",
                     "zones": "WL101",
                     "date_line": "WL510",
-                    "dst": "WL520",
+                    "dst": "WL601",
                 }[name]
             ]
             view = api("GET", f"/flights/{flight['id']}")
@@ -292,14 +278,30 @@ def experiment(name, token, traveler_token):
             elif name == "zones":
                 checks["different_zone_offsets"] = arr.utcoffset() != dep.utcoffset()
             else:
-                earlier = local_instant(
-                    datetime(2026, 11, 1, 1, 30), "America/New_York", 0
+                second = api("GET", f"/flights/{flights['WL602']['id']}")
+                following = datetime.fromisoformat(second["scheduled_dep"]).astimezone(
+                    ZoneInfo("America/New_York")
                 )
+                earlier = local_instant(arr.replace(tzinfo=None), "America/New_York", 0)
                 later = local_instant(
-                    datetime(2026, 11, 1, 1, 30), "America/New_York", 1
+                    following.replace(tzinfo=None), "America/New_York", 1
                 )
                 checks["repeated_local_hour_elapsed"] = (later - earlier) == timedelta(
                     hours=1
+                ) and arr.hour == following.hour == 1
+                rules = api("GET", "/policies")
+                minimum = next(
+                    p["international"] for p in rules if p["airport"] == "JFK"
+                )
+                checks["connection_violates_mct"] = (
+                    later - earlier
+                ).total_seconds() / 60 < minimum
+                api(
+                    "POST",
+                    "/trips",
+                    {"title": "DST validation", "flights": [view["id"], second["id"]]},
+                    status=422,
+                    traveler=True,
                 )
             after = {
                 "flight": view,

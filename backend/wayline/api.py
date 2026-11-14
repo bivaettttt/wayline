@@ -1,5 +1,5 @@
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from secrets import token_urlsafe
 from typing import Annotated
 from uuid import UUID, uuid4
@@ -161,7 +161,7 @@ def list_trips(actor: Actor, offset: Offset = 0):
     with engine.connect() as conn:
         return many(
             conn,
-            """SELECT t.*,s.risk,s.detail FROM trips t LEFT JOIN LATERAL
+            """SELECT t.*,s.risk,s.detail, EXISTS(SELECT 1 FROM incidents i WHERE i.trip=t.id AND i.resolved_at IS NULL) AS disrupted FROM trips t LEFT JOIN LATERAL
           (SELECT risk,detail FROM assessments WHERE trip=t.id ORDER BY id DESC LIMIT 1) s ON true
           WHERE :staff OR t.owner=:owner ORDER BY t.created_at DESC,t.id LIMIT 50 OFFSET :offset""",
             staff=actor["role"] in OPS,
@@ -243,21 +243,23 @@ def alternatives(id: UUID, actor: Actor, request: Request):
     ):
         trips.visible(conn, id, actor)
         legs = trips.trip_flights(conn, id)
-        first = legs[0]
+        arrived = 0
+        for leg in legs:
+            if leg["status"] not in {"ARRIVED", "LANDED"}:
+                break
+            arrived += 1
+        remaining = legs[arrived:]
+        if not remaining:
+            raise HTTPException(409, "TRIP_ALREADY_ARRIVED")
+        first = remaining[0]
         if first["actual_dep"]:
-            if first["status"] not in {"ARRIVED", "LANDED"} or len(legs) == 1:
-                raise HTTPException(409, "ALTERNATIVES_REQUIRE_GROUND_POSITION")
-            origin = first["destination"]
-            minimum = trips.policy_map(conn)[origin]["international"]
-
-            earliest = max(
-                effective(first, "arr") + timedelta(minutes=minimum), datetime.now(UTC)
-            )
-            remaining = legs[1:]
-        else:
-            origin = first["origin"]
-            earliest = max(first["scheduled_dep"], datetime.now(UTC))
-            remaining = legs
+            raise HTTPException(409, "ALTERNATIVES_REQUIRE_GROUND_POSITION")
+        inbound = legs[arrived - 1] if arrived else None
+        origin = first["origin"]
+        earliest = max(
+            effective(inbound, "arr") if inbound else first["scheduled_dep"],
+            datetime.now(UTC),
+        )
         params = dict(
             origin=origin,
             destination=legs[-1]["destination"],
@@ -272,6 +274,7 @@ def alternatives(id: UUID, actor: Actor, request: Request):
             request.state.id,
             id,
             excluded=[f["id"] for f in remaining],
+            inbound=inbound,
         )
 
 

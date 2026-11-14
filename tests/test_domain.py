@@ -141,3 +141,14 @@ def test_date_line_and_delayed_midnight():
         estimated.astimezone(ZoneInfo("Europe/Rome")).date()
         > scheduled.astimezone(ZoneInfo("Europe/Rome")).date()
     )
+
+
+def test_recommendation_checks_connection_from_completed_leg():
+    inbound = leg("arrived", "OVB", "IST", 0, 200, "ARRIVED")
+    inbound["terminal_arr"] = "B"
+    early = leg("early", "IST", "FCO", 270, 420)
+    later = leg("later", "IST", "FCO", 285, 450)
+    options = routes([early, later], POLICY, "IST", "FCO", NOON, 2, 24, inbound=inbound)
+    assert len(options) == 1
+    assert options[0]["segments"][0]["id"] == "later"
+    assert options[0]["connections"][0]["minimum_minutes"] == 80

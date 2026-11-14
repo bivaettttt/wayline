@@ -108,7 +108,15 @@ def assess_connection(inbound, outbound, policies, fresh):
 
 
 def routes(
-    flights, policies, origin, destination, earliest, max_legs, max_hours, excluded=()
+    flights,
+    policies,
+    origin,
+    destination,
+    earliest,
+    max_legs,
+    max_hours,
+    excluded=(),
+    inbound=None,
 ):
     graph = defaultdict(list)
     for f in flights:
@@ -130,8 +138,9 @@ def routes(
                 or arrival <= departure
             ):
                 continue
+            previous = path[-1] if path else inbound
             connection = (
-                assess_connection(path[-1], leg, policies, True) if path else None
+                assess_connection(previous, leg, policies, True) if previous else None
             )
             if connection and connection["risk"] != "SAFE":
                 continue

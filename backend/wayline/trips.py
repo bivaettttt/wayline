@@ -222,7 +222,7 @@ def detail(conn, id, actor):
     }
 
 
-def search(conn, params, actor, request, trip=None, excluded=()):
+def search(conn, params, actor, request, trip=None, excluded=(), inbound=None):
     state = feed(conn)
     catalog = many(
         conn,
@@ -235,7 +235,7 @@ def search(conn, params, actor, request, trip=None, excluded=()):
     if len(catalog) > 1000:
         raise HTTPException(422, "SEARCH_CATALOG_LIMIT")
     options = (
-        routes(catalog, policy_map(conn), excluded=excluded, **params)
+        routes(catalog, policy_map(conn), excluded=excluded, inbound=inbound, **params)
         if state["fresh"]
         else []
     )
@@ -247,7 +247,13 @@ def search(conn, params, actor, request, trip=None, excluded=()):
         a=actor,
         g=state["generation"],
         r=request,
-        i=pack(params),
+        i=pack(
+            params
+            | {
+                "excluded": list(excluded),
+                "inbound": inbound["id"] if inbound else None,
+            }
+        ),
         o=pack(options),
     )
     item["status"] = (

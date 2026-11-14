@@ -37,6 +37,7 @@ def fixture(day):
 
     legs = [
         ("WL101", "OVB", "IST", 6, 0, 11, 0, "A", "A"),
+        ("WL103", "OVB", "IST", 6, 30, 11, 30, "A", "A"),
         ("WL202", "IST", "FCO", 12, 35, 15, 25, "A", "A"),
         ("WL214", "IST", "FCO", 15, 35, 18, 15, "A", "A"),
         ("WL220", "IST", "FCO", 19, 0, 21, 45, "B", "A"),
@@ -49,7 +50,7 @@ def fixture(day):
         ("WL520", "JFK", "LHR", 23, 40, 31, 0, "A", "A"),
         ("WL900", "FCO", "OVB", 27, 0, 35, 20, "A", "B"),
     ]
-    return [
+    catalog = [
         {
             "id": n + "-" + day.date().isoformat(),
             "number": n,
@@ -63,6 +64,30 @@ def fixture(day):
         }
         for n, o, d, h, m, a, b, td, ta in legs
     ]
+    year = day.year
+    november = datetime(year, 11, 1, tzinfo=UTC)
+    transition_day = november + timedelta(days=(6 - november.weekday()) % 7)
+    if transition_day < day:
+        november = datetime(year + 1, 11, 1, tzinfo=UTC)
+        transition_day = november + timedelta(days=(6 - november.weekday()) % 7)
+    for number, origin, destination, start, stop in [
+        ("WL601", "LHR", "JFK", 0, 5.5),
+        ("WL602", "JFK", "LAX", 6.5, 12),
+    ]:
+        catalog.append(
+            {
+                "id": number + "-" + transition_day.date().isoformat(),
+                "number": number,
+                "airline": "WL",
+                "origin": origin,
+                "destination": destination,
+                "scheduled_dep": (transition_day + timedelta(hours=start)).isoformat(),
+                "scheduled_arr": (transition_day + timedelta(hours=stop)).isoformat(),
+                "terminal_dep": "A",
+                "terminal_arr": "A",
+            }
+        )
+    return catalog
 
 
 with closing(connect()) as conn, conn:

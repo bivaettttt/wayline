@@ -1,0 +1,390 @@
+:root {
+  font-family: "IBM Plex Sans", Arial, sans-serif;
+  color: #162a41;
+  background: #f4f7fb;
+  --ink: #162a41;
+  --muted: #50627a;
+  --line: #dbe4ef;
+  --nav: #122942;
+  --blue: #145ca5;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #bfcede;
+  border-radius: 6px;
+  padding: 0.58rem 0.7rem;
+}
+button,
+.button {
+  font-weight: 600;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.button {
+  padding: 0.59rem 0.74rem;
+  border-radius: 6px;
+}
+.primary {
+  color: #fff;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.primary:hover {
+  background: #0b487f;
+}
+:focus-visible {
+  outline: 2px solid #157ddd;
+  outline-offset: 3px;
+}
+.shell {
+  display: grid;
+  grid-template-columns: 218px minmax(0, 1fr);
+  min-height: 100vh;
+}
+.shell aside {
+  background: var(--nav);
+  color: #f3f8ff;
+  padding: 1.35rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+  font-size: 1.8rem;
+  letter-spacing: -0.055em;
+}
+.brand span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: #135a8a;
+  background: #c6e8fb;
+  border-radius: 8px;
+}
+nav {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 1.85rem;
+}
+nav a {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.69rem 0.65rem;
+  border-radius: 6px;
+  color: #d6e5f5;
+  font-size: 0.92rem;
+}
+nav a:hover,
+nav a.active {
+  background: #24486e;
+  color: #fff;
+  text-decoration: none;
+}
+.shell footer {
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid #3e5871;
+  color: #bcd2e8;
+  font-size: 0.8rem;
+}
+.top {
+  min-height: 61px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: white;
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 1.55rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.top div {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+}
+.top b {
+  color: var(--ink);
+}
+.top button {
+  display: grid;
+  place-items: center;
+  padding: 0.42rem;
+}
+main {
+  max-width: 1490px;
+  margin: auto;
+  padding: 1.5rem 1.55rem 2.8rem;
+}
+.headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.48rem 0 1.35rem;
+}
+.headline h1,
+.login h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  letter-spacing: -0.045em;
+}
+.headline p {
+  margin-top: 0.3rem;
+  color: var(--muted);
+}
+.muted {
+  color: var(--muted);
+}
+.panel {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.panel h2 {
+  padding: 0.83rem 0.95rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 1.03rem;
+}
+.pad {
+  padding: 0.82rem 0.95rem;
+}
+.scroll {
+  overflow: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  font-size: 0.9rem;
+}
+td,
+th {
+  padding: 0.7rem 0.88rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e8edf4;
+}
+th {
+  font-size: 0.8rem;
+  background: #f5f8fc;
+  color: #405773;
+}
+td a {
+  font-weight: 600;
+}
+tr:last-child td {
+  border-bottom: 0;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+.metrics section {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.metrics span {
+  color: var(--muted);
+  font-size: 0.83rem;
+}
+.metrics strong {
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+  letter-spacing: -0.03em;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.72rem;
+}
+.form {
+  display: grid;
+  max-width: 740px;
+  gap: 0.8rem;
+}
+.form button {
+  justify-self: start;
+}
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+.badge {
+  display: inline-block;
+  border-radius: 5px;
+  padding: 0.24rem 0.43rem;
+  font-size: 0.77rem;
+  font-weight: 600;
+  background: #e9eff7;
+  color: #365674;
+}
+.badge.safe,
+.badge.resolved {
+  background: #e0f1e8;
+  color: #215740;
+}
+.badge.at_risk,
+.badge.acknowledged {
+  background: #fff0d5;
+  color: #7c5317;
+}
+.badge.missed,
+.badge.cancelled,
+.error {
+  background: #fbe8e7;
+  color: #8d3029;
+}
+.error {
+  padding: 0.66rem 0.75rem;
+  margin: 0.4rem;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+details {
+  padding: 0.65rem 0.87rem;
+  border-bottom: 1px solid var(--line);
+}
+details:last-child {
+  border-bottom: 0;
+}
+td details {
+  padding: 0;
+}
+summary {
+  cursor: pointer;
+}
+pre {
+  background: #eef4fa;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: auto;
+  padding: 0.7rem;
+  max-height: 30rem;
+  font-size: 0.74rem;
+}
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+  background: white;
+}
+.login section {
+  width: min(100%, 440px);
+  align-self: center;
+  margin: auto;
+  padding: 2rem;
+}
+.login h1 {
+  margin: 1.8rem 0 0.3rem;
+}
+.login section p {
+  color: var(--muted);
+}
+.login form {
+  margin-top: 1.3rem;
+}
+.login-side {
+  display: grid;
+  align-content: center;
+  gap: 0.8rem;
+  padding: 4rem;
+  background: var(--nav);
+  color: white;
+}
+.login-side p {
+  max-width: 365px;
+  color: #c9def1;
+}
+.login-side svg {
+  color: #a6d8f6;
+}
+@media (max-width: 880px) {
+  .shell {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+  main {
+    padding: 1rem;
+  }
+  .top {
+    padding: 0.55rem 1rem;
+  }
+}
+@media (max-width: 640px) {
+  .shell,
+  .login {
+    display: block;
+  }
+  .login-side {
+    display: none;
+  }
+  .shell aside {
+    position: static;
+    height: auto;
+    padding: 0.65rem;
+  }
+  .shell nav {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .shell nav a {
+    font-size: 0.76rem;
+    padding: 0.32rem;
+  }
+  .shell footer,
+  .top > span {
+    display: none;
+  }
+  .headline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .toolbar label {
+    width: 100%;
+  }
+}
