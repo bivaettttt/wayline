@@ -1,0 +1,11 @@
+C4Context
+  title Wayline context
+  Person(traveler, "Traveler", "Plans and reviews owned itineraries")
+  Person(analyst, "Operations analyst", "Inspects event dispositions and provider health")
+  Person(admin, "Administrator", "Maintains connection policies and isolated scenarios")
+  System(wayline, "Wayline", "Synthetic trip monitoring and route planning")
+  System_Ext(provider, "Flight Data Provider Simulator", "Supplies synthetic timetable and ordered status feed")
+  Rel(traveler, wayline, "Creates trips and compares routes")
+  Rel(analyst, wayline, "Inspects provider runs")
+  Rel(admin, wayline, "Publishes MCT and runs experiments")
+  Rel(wayline, provider, "Polls REST feed")

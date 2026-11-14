@@ -1,0 +1,8 @@
+flowchart LR
+  T[Browser] --> W[nginx and React]
+  W --> A[FastAPI modular monolith]
+  A --> DB[(Wayline PostgreSQL)]
+  P[Polling worker] --> DB
+  P -->|GET events| S[Independent provider API]
+  A -->|Schedule and diagnostic HTTP| S
+  S --> D[(Provider SQLite volume)]

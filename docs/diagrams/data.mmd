@@ -1,0 +1,14 @@
+erDiagram
+  USERS ||--o{ TRIPS : owns
+  USERS ||--o{ SESSIONS : authenticates
+  TRIPS ||--|{ SEGMENTS : contains
+  FLIGHTS ||--o{ SEGMENTS : appears_in
+  AIRPORTS ||--o{ FLIGHTS : bounds
+  AIRPORTS ||--o{ POLICIES : versions
+  AIRLINES ||--o{ FLIGHTS : operates
+  TRIPS ||--o{ ASSESSMENTS : receives
+  TRIPS ||--o{ INCIDENTS : tracks
+  TRIPS ||--o{ NOTIFICATIONS : exposes
+  ASSESSMENTS ||--o{ NOTIFICATIONS : explains
+  EVENTS o|--o{ ASSESSMENTS : triggers
+  TRIPS o|--o{ SEARCHES : contextualizes

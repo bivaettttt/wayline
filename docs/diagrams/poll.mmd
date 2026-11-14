@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant W as Wayline poller
+  participant P as Provider
+  participant D as PostgreSQL
+  W->>D: Read checkpoint
+  W->>P: GET events after checkpoint
+  alt valid ordered batch
+    W->>D: Lock checkpoint and compare
+    W->>D: Append dispositions and update flight projections
+    W->>D: Reassess affected trips and persist notifications
+    W->>D: Commit new checkpoint with results
+  else unavailable or invalid response
+    W->>D: Record provider failure and keep checkpoint
+  end

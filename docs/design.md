@@ -31,3 +31,36 @@ Travelers need an explanation when a change to one flight affects the rest of th
 | BR-04 | Policy is per airport. International connections use a distinct time. Different terminals add a margin |
 | BR-05 | Alternatives exclude canceled and diverted flights and only used airport paths are expanded |
 | BR-06 | Missing provider data is explicit even when last known estimates are retained |
+
+## Actors and use cases
+
+| Participant | Need | Use case |
+| --- | --- | --- |
+| Traveler | Know if an existing itinerary is workable | UC-01. Save occurrences in travel order, read own assessment, compare suggestions and acknowledge a disruption |
+| Operations analyst | Explain projection changes | UC-02. Inspect provider status, feed cursor, event payload/version and disposition. Synchronize again from the saved cursor |
+| Administrator | Maintain reproducibility | UC-03. Manage demo users, publish a new synthetic MCT and run experiments in the isolated deployment |
+
+NFR-01 requires atomic progress through the provider feed. NFR-02 requires object-scoped access and chronological evidence. NFR-03 requires MCT version traceability. NFR-04 requires independent reset of the lab. BR-05 rejects revisiting airports, requires each candidate flight to be usable, and enforces one- to three-leg search with a 1–72-hour horizon. Up to five options are retained per search. A one-minute reduction is visible in assessments even if the incident reason remains unchanged.
+
+## Decision matrix
+
+| Input | Flight projection | Trip effect |
+| --- | --- | --- |
+| Event ID and normalized body repeat | Keep projection | No duplicate recalculation |
+| Same event ID with another body | Record ID conflict | Keep previous assessment |
+| Lower revision | Append stale disposition | Keep previous assessment |
+| Same revision, different flight data | Record revision conflict | Keep previous assessment |
+| Higher revision fights terminal or actual facts | Record rejected transition | Keep previous assessment |
+| Higher valid revision | Apply with gap/late reason where relevant | Reassess linked trips |
+| Timeout or invalid envelope | Keep forecast, mark feed unavailable | UNKNOWN where affected by unconfirmed information |
+| Recovery | Poll retained checkpoint | Reassess freshness and resolve applicable incident |
+
+Effective time uses actual, then estimated, then scheduled. International MCT applies if either leg is international. Different terminals add the rule's margin. On an already-started journey, completed segments determine the known airport and the inbound leg participates in the first candidate connection check.
+
+## Data dictionary and policy
+
+A flight occurrence is a dated instance of a synthetic flight number. A source event has an identity and a flight revision. Delivery sequence is a separate feed position. A trip contains ordered references to occurrences. An assessment freezes the effective gaps, applicable rule versions and flight revisions. An incident tracks acknowledgment and resolution. A search records the schedule generation, constraints and suggestions. A notification is an in-app message derived from an incident change.
+
+Travelers can read the shared synthetic catalogue and operate on their own trips, notifications and searches. Operations analysts read shared trip diagnostics and synchronize the provider. Administrators additionally create users, publish MCT and run permitted lab scenarios. Password hashes and session digests remain server-side. The API binds callbacks to a fixed provider hostname and exposes no arbitrary destinations. External traffic, commercial GDS, passenger identities and public deployment are excluded.
+
+[Context](diagrams/context.mmd) · [Containers](diagrams/containers.mmd) · [ERD](diagrams/data.mmd) · [Polling sequence](diagrams/poll.mmd) · [Incident states](diagrams/incident.mmd) · [Traceability](verification.md)
