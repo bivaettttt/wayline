@@ -416,7 +416,7 @@ def lab_config(actor: Actor):
 
 
 @app.post(A + "/lab/{scenario}")
-def lab_run(scenario: str, actor: Actor, request: Request):
+def lab_run(scenario: str, actor: Actor, request: Request, keep_delay: bool = False):
     allow(actor, "ADMIN")
     if os.getenv("LAB_MODE") != "1" or scenario not in SCENARIOS:
         raise HTTPException(404, "SCENARIO_NOT_FOUND")
@@ -434,7 +434,7 @@ def lab_run(scenario: str, actor: Actor, request: Request):
                     u=login,
                 )
         try:
-            result = experiment(scenario, admin, traveler)
+            result = experiment(scenario, admin, traveler, keep_delay)
             audit(
                 conn,
                 actor["login"],

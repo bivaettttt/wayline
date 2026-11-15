@@ -11,6 +11,7 @@ SCENARIOS = {
     "normal": "Поездка по расписанию",
     "small_delay": "Небольшая задержка",
     "risk": "Риск пересадки",
+    "restore": "Восстановление планового прогноза",
     "cancel": "Отмена рейса",
     "alternatives": "Есть альтернативы",
     "no_route": "Альтернатив нет",
@@ -33,7 +34,7 @@ SCENARIOS = {
 }
 
 
-def experiment(name, token, traveler_token):
+def experiment(name, token, traveler_token, keep_delay=False):
     trace = []
     checks = {}
     after = None
@@ -123,7 +124,12 @@ def experiment(name, token, traveler_token):
                 for e in response["events"]
             )
 
-        if name in {"small_delay", "risk", "alternatives", "cancel"}:
+        if name == "restore":
+            event(0, estimated_arr=None, estimated_dep=None)
+            poll()
+            after = api("GET", path)
+            checks["restored"] = after["assessments"][0]["risk"] == "SAFE"
+        elif name in {"small_delay", "risk", "alternatives", "cancel"}:
             item = event(
                 15 if name == "small_delay" else 60,
                 **({"status": "CANCELLED"} if name == "cancel" else {}),
@@ -308,7 +314,7 @@ def experiment(name, token, traveler_token):
                 "departure_local": dep.isoformat(),
                 "arrival_local": arr.isoformat(),
             }
-        if name in {
+        if not (name == "risk" and keep_delay) and name in {
             "small_delay",
             "risk",
             "alternatives",

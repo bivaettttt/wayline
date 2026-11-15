@@ -1210,7 +1210,17 @@ function Lab({ scenarios }: { scenarios: Record<string, string> }) {
       <Panel title="Эксперимент">
         <form
           className="pad toolbar"
-          onSubmit={(e) => act.mutate({ path: "/lab/" + form(e).scenario })}
+          onSubmit={(e) => {
+            const settings = form(e);
+            act.mutate({
+              path:
+                "/lab/" +
+                settings.scenario +
+                (settings.keep_delay && settings.scenario === "risk"
+                  ? "?keep_delay=true"
+                  : ""),
+            });
+          }}
         >
           <label>
             Сценарий
@@ -1221,6 +1231,10 @@ function Lab({ scenarios }: { scenarios: Record<string, string> }) {
                 </option>
               ))}
             </select>
+          </label>
+          <label className="checkbox">
+            <input type="checkbox" name="keep_delay" /> Оставить задержку после
+            проверки риска
           </label>
           <button className="primary" disabled={act.isPending}>
             {act.isPending ? "Выполняется…" : "Запустить сценарий"}

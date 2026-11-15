@@ -9,6 +9,7 @@ from wayline.trips import create
 
 with engine.begin() as conn:
     run(conn, "SELECT pg_advisory_xact_lock(731200)")
+    load_catalog(conn)
     if not one(conn, "SELECT login FROM users WHERE login='admin'"):
         password = os.environ["DEMO_PASSWORD"]
         if len(password) < 12:
@@ -27,7 +28,6 @@ with engine.begin() as conn:
                 r=role,
                 p=passwords.hash(password),
             )
-        load_catalog(conn)
         for airport, domestic, international, extra in [
             ("OVB", 35, 75, 10),
             ("IST", 45, 60, 20),

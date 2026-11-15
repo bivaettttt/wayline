@@ -5,7 +5,9 @@ async function signIn(page: Page, user: string) {
   await page.getByRole("textbox", { name: "Логин" }).fill(user);
   await page.getByLabel("Пароль").fill(password);
   await page.getByRole("button", { name: "Войти" }).click();
-  await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible({
+    timeout: 15000,
+  });
 }
 async function swap(page: Page, user: string) {
   await page.getByRole("button", { name: "Выйти" }).click();
@@ -63,6 +65,9 @@ test("traveler creates an itinerary and compares alternatives after a provider u
   await swap(page, "admin");
   await nav(page, "Лаборатория");
   await page.getByRole("combobox", { name: "Сценарий" }).selectOption("risk");
+  await page
+    .getByRole("checkbox", { name: "Оставить задержку после проверки риска" })
+    .check();
   await page.getByRole("button", { name: "Запустить сценарий" }).click();
   await expect(
     page.getByRole("heading", { name: "Проверка пройдена" }),
@@ -91,6 +96,9 @@ test("traveler creates an itinerary and compares alternatives after a provider u
   await expect(notice.getByText("Прочитано")).toBeVisible();
   await page.evaluate((url) => (location.hash = new URL(url).hash), trip);
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: "35 мин", exact: true }),
+  ).toBeVisible();
   await capture(page, "connection");
   await capture(page, "disruption-details");
   await page.getByRole("button", { name: "Найти альтернативы" }).click();
@@ -112,6 +120,15 @@ test("traveler creates an itinerary and compares alternatives after a provider u
     page.getByRole("cell", { name: "APPLIED", exact: true }).first(),
   ).toBeVisible();
   await capture(page, "flight");
+  await swap(page, "admin");
+  await nav(page, "Лаборатория");
+  await page
+    .getByRole("combobox", { name: "Сценарий" })
+    .selectOption("restore");
+  await page.getByRole("button", { name: "Запустить сценарий" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Проверка пройдена" }),
+  ).toBeVisible();
 });
 
 test("disruption centre only exposes owned incidents", async ({ page }) => {

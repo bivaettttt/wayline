@@ -64,6 +64,7 @@ for name in (
     "normal",
     "small_delay",
     "risk",
+    "restore",
     "alternatives",
     "no_route",
     "duplicate",
@@ -160,5 +161,5 @@ with httpx.Client(
 
 assert api("admin", "POST", "/lab/cancel")["passed"]
 print(
-    "22 lab scenarios and PostgreSQL integration, access scope, notification, rollback and replay verified."
+    "23 lab scenarios and PostgreSQL integration, access scope, notification, rollback and replay verified."
 )
